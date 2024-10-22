@@ -48,11 +48,11 @@ class FourStageAE(nn.Module):
 
 class FourLayerDenoiserHPE(nn.Module):
     def __init__(self, encoder):
-        super(ThreeLayerDenoiserHPE, self).__init__()
+        super(FourLayerDenoiserHPE, self).__init__()
         num_lay = 64#numer hidden dim of DyConv1
         hidden_reg = 32 #number hidden dim of Regression
         self.encoder = encoder
-        self.skunit1 = SKUnit(in_features=32, mid_features=num_lay, out_features=num_lay, dim1 = 14,dim2 = 10,pool_dim = 'freq-chan', M=1, G=64, r=4, stride=1, L=32)
+        self.skunit1 = SKUnit(in_features=64, mid_features=num_lay, out_features=num_lay, dim1 = 14,dim2 = 10,pool_dim = 'freq-chan', M=1, G=64, r=4, stride=1, L=32)
         self.skunit2 = SKUnit(in_features=num_lay, mid_features=num_lay*2, out_features=num_lay*2, dim1 = 14,dim2 = 8,pool_dim = 'freq-chan', M=1, G=64, r=4, stride=1, L=32)
         self.regression = regression(input_dim =1792,output_dim = 34, hidden_dim= hidden_reg)
 

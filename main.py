@@ -15,7 +15,7 @@ from tqdm import tqdm
 
 from constant import experiment_config, denoiser_config
 from dataset_lib import make_dataset, make_dataloader
-from model import OriginalHPE, OneLayerDenoiserHPE, TwoLayerDenoiserHPE, ThreeLayerDenoiserHPE
+from model import OriginalHPE, OneLayerDenoiserHPE, TwoLayerDenoiserHPE, ThreeLayerDenoiserHPE, FourLayerDenoiserHPE
 from utils import compute_pck_pckh, calulate_error, add_awgn
 with open(experiment_config['mmfi_config'], 'r') as fd:  # change the .yaml file in your code.
     config = yaml.load(fd, Loader=yaml.FullLoader)
@@ -29,12 +29,13 @@ val_loader = make_dataloader(val_data, is_training=False, generator=rng_generato
 test_loader = make_dataloader(test_data, is_training=False, generator=rng_generator, **config['test_loader'])
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-
+torch.cuda.empty_cache()
 for noise_lv in tqdm(experiment_config["noise_level"]):
+    torch.cuda.empty_cache()
     AEncoder = torch.load(os.path.join(denoiser_config['checkpoint'], str(noise_lv), "last.pt"))
     denoiser = AEncoder.getEncoder()
     torch.cuda.empty_cache()
-    metafi = ThreeLayerDenoiserHPE(denoiser).to(device)
+    metafi = FourLayerDenoiserHPE(denoiser).to(device)
     criterion_L2 = nn.MSELoss().cuda()
     optimizer = torch.optim.SGD(metafi.parameters(), lr = 0.001, momentum=0.9)
     n_epochs = 20
@@ -50,13 +51,14 @@ for noise_lv in tqdm(experiment_config["noise_level"]):
     
     
     for epoch_index in tqdm(range(num_epochs)):
-    
+        torch.cuda.empty_cache()
         loss = 0
         train_loss_iter = []
         metric = []
         metafi.train()
         relation_mean =[]
         for idx, data in enumerate(train_loader):
+            torch.cuda.empty_cache()
             csi_data = data['input_wifi-csi']
             
             if experiment_config['mode'] == 1:
@@ -115,6 +117,7 @@ for noise_lv in tqdm(experiment_config["noise_level"]):
         pck_20_iter = []
         with torch.no_grad():
             for idx, data in enumerate(val_loader):
+                torch.cuda.empty_cache()
                 csi_data = data['input_wifi-csi']
                 if experiment_config['mode'] == 1:
                     csi_data = csi_data.numpy()
@@ -205,7 +208,7 @@ for noise_lv in tqdm(experiment_config["noise_level"]):
     metafi = torch.load(os.path.join(experiment_config['checkpoint'], str(noise_lv), "best.pt"))
     with torch.no_grad():
         for i, data in enumerate(test_loader):
-    
+            torch.cuda.empty_cache()
             csi_data = data['input_wifi-csi']
             #csi_data = torch.mean(csi_data, dim =2)
             scale = 6

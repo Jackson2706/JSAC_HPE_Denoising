@@ -15,8 +15,10 @@ from tqdm import tqdm
 
 from constant import experiment_config, denoiser_config
 from dataset_lib import make_dataset, make_dataloader
-from model import OriginalHPE, OneLayerDenoiserHPE, TwoLayerDenoiserHPE, ThreeLayerDenoiserHPE, FourLayerDenoiserHPE
+from model import OriginalHPE, OneLayerDenoiserHPE, TwoLayerDenoiserHPE, ThreeLayerDenoiserHPE, FourLayerDenoiserHPE, FiveLayerDenoiserHPE
 from utils import compute_pck_pckh, calulate_error, add_awgn
+from traditional_filter import mean_filter, apply_kalman_filter_4d
+
 with open(experiment_config['mmfi_config'], 'r') as fd:  # change the .yaml file in your code.
     config = yaml.load(fd, Loader=yaml.FullLoader)
     
@@ -32,10 +34,13 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 torch.cuda.empty_cache()
 for noise_lv in tqdm(experiment_config["noise_level"]):
     torch.cuda.empty_cache()
-    AEncoder = torch.load(os.path.join(denoiser_config['checkpoint'], str(noise_lv), "last.pt"))
-    denoiser = AEncoder.getEncoder()
-    torch.cuda.empty_cache()
-    metafi = FourLayerDenoiserHPE(denoiser).to(device)
+    if experiment_config['mode'] != 1:
+        metafi = OriginalHPE().to(device)
+    else:
+        AEncoder = torch.load(os.path.join(denoiser_config['checkpoint'], str(noise_lv), "last.pt"))
+        denoiser = AEncoder.getEncoder()
+        metafi = FiveLayerDenoiserHPE(denoiser).to(device)
+        
     criterion_L2 = nn.MSELoss().cuda()
     optimizer = torch.optim.SGD(metafi.parameters(), lr = 0.001, momentum=0.9)
     n_epochs = 20
@@ -64,7 +69,10 @@ for noise_lv in tqdm(experiment_config["noise_level"]):
             if experiment_config['mode'] == 1:
                 csi_data = csi_data.numpy()
                 csi_data = add_awgn(csi_data, noise_lv)
-                        
+            elif experiment_config['mode'] == 2:
+                csi_data = csi_data.numpy()
+                csi_data = apply_kalman_filter_4d(csi_data)
+                
             csi_data = torch.tensor(csi_data)
             csi_data = csi_data.cuda()
             csi_data = csi_data.type(torch.cuda.FloatTensor)
@@ -122,7 +130,10 @@ for noise_lv in tqdm(experiment_config["noise_level"]):
                 if experiment_config['mode'] == 1:
                     csi_data = csi_data.numpy()
                     csi_data = add_awgn(csi_data, noise_lv)
-                
+                elif experiment_config['mode'] == 2:
+                    csi_data = csi_data.numpy()
+                    csi_data = add_awgn(csi_data, noise_lv)
+                    csi_data = apply_kalman_filter_4d(csi_data)
                 
                 csi_data = torch.tensor(csi_data)
                 csi_data = csi_data.cuda()
@@ -229,7 +240,8 @@ for noise_lv in tqdm(experiment_config["noise_level"]):
             
             csi_data = csi_data.to('cpu').numpy()
             csi_data = add_awgn(csi_data, noise_level=noise_lv)
-            
+            if experiment_config['mode'] == 2:
+                csi_data = apply_kalman_filter_4d(csi_data)
     
     
             #for i in range(csi_data.shape[0]):

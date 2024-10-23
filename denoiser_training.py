@@ -18,7 +18,7 @@ import torch
 
 from constant import experiment_config, denoiser_config
 from dataset_lib import make_dataset, make_dataloader
-from model import OneStageAE, TwoStageAE, ThreeStageAE, FourStageAE
+from model import OneStageAE, TwoStageAE, ThreeStageAE, FourStageAE, FiveStageAE
 from utils import compute_pck_pckh, calulate_error, add_awgn
 
 with open(experiment_config['mmfi_config'], 'r') as fd:  # change the .yaml file in your code.
@@ -38,11 +38,13 @@ num_epochs = denoiser_config['epoch']  # Number of training epochs
 
 # Training loop
 for noise_lv in tqdm(experiment_config["noise_level"]):
+    if noise_lv < 1:
+        continue
     torch.cuda.empty_cache()
-    previousAE = torch.load(os.path.join("/home/jackson-devworks/Desktop/ECCV_2024/output/ThreeLayerDenosing/Encoder-DecoderReconstructor", str(noise_lv), "last.pt"))
+    previousAE = torch.load(os.path.join("/home/jackson-devworks/Desktop/ECCV_2024/output/FourLayerDenosing/Encoder-DecoderReconstructor", str(noise_lv), "last.pt"))
     checkpoint_path = os.path.join(denoiser_config['checkpoint'], str(noise_lv))
     os.makedirs(checkpoint_path, exist_ok=True)
-    model = FourStageAE(previousAE.getEncoder()).to(device)
+    model = FiveStageAE(previousAE.getEncoder()).to(device)
     criterion = nn.MSELoss().to(device)  # Mean Squared Error Loss for reconstruction
     optimizer = optim.Adam(model.parameters(), lr=0.001)  # Adam optimizer
     for epoch in tqdm(range(num_epochs)):

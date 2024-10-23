@@ -26,3 +26,27 @@ def add_awgn(signal, noise_level):
     noisy_signal = signal + noise
     
     return noisy_signal
+
+def add_salt_and_pepper_noise(signal, noise_level):
+    """
+    Add salt and pepper noise to a signal.
+
+    :param signal: Input signal (numpy array).
+    :param noise_level: Proportion of pixels to be corrupted with salt and pepper noise.
+    :return: Noisy signal with salt and pepper noise added.
+    """
+    noisy_signal = np.copy(signal)
+
+    # Calculate number of salt and pepper pixels
+    num_salt = np.floor(noise_level * signal.size * 0.5).astype(int)
+    num_pepper = np.floor(noise_level * signal.size * 0.5).astype(int)
+
+    # Add salt (white) noise
+    salt_coords = [np.random.randint(0, dim, num_salt) for dim in signal.shape]
+    noisy_signal[tuple(salt_coords)] = 1
+
+    # Add pepper (black) noise
+    pepper_coords = [np.random.randint(0, dim, num_pepper) for dim in signal.shape]
+    noisy_signal[tuple(pepper_coords)] = 0
+
+    return noisy_signal

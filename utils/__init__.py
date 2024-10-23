@@ -7,4 +7,4 @@ Created on Mon Oct 21 10:30:50 2024
 """
 
 from .eval import compute_pck_pckh, calulate_error
-from .noise import add_awgn
+from .noise import add_awgn, add_salt_and_pepper_noise

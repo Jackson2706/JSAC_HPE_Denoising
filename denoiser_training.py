@@ -19,7 +19,7 @@ import torch
 from constant import experiment_config, denoiser_config
 from dataset_lib import make_dataset, make_dataloader
 from model import OneStageAE, TwoStageAE, ThreeStageAE, FourStageAE, FiveStageAE
-from utils import compute_pck_pckh, calulate_error, add_awgn
+from utils import compute_pck_pckh, calulate_error, add_awgn, add_salt_and_pepper_noise
 
 with open(experiment_config['mmfi_config'], 'r') as fd:  # change the .yaml file in your code.
     config = yaml.load(fd, Loader=yaml.FullLoader)
@@ -38,13 +38,15 @@ num_epochs = denoiser_config['epoch']  # Number of training epochs
 
 # Training loop
 for noise_lv in tqdm(experiment_config["noise_level"]):
-    if noise_lv < 1:
-        continue
     torch.cuda.empty_cache()
-    previousAE = torch.load(os.path.join("/home/jackson-devworks/Desktop/ECCV_2024/output/FourLayerDenosing/Encoder-DecoderReconstructor", str(noise_lv), "last.pt"))
+    if denoiser_config['mode'] == 0:
+        model = OneStageAE().to(device)
+    else:
+        previousAE = torch.load(os.path.join(denoiser_config['previous_encoder'], str(noise_lv), "last.pt"))
+        model = FiveStageAE(previousAE.getEncoder()).to(device)
+        
     checkpoint_path = os.path.join(denoiser_config['checkpoint'], str(noise_lv))
     os.makedirs(checkpoint_path, exist_ok=True)
-    model = FiveStageAE(previousAE.getEncoder()).to(device)
     criterion = nn.MSELoss().to(device)  # Mean Squared Error Loss for reconstruction
     optimizer = optim.Adam(model.parameters(), lr=0.001)  # Adam optimizer
     for epoch in tqdm(range(num_epochs)):
@@ -61,7 +63,7 @@ for noise_lv in tqdm(experiment_config["noise_level"]):
                 csi_data = csi_data.cpu().detach()
                 
             csi_data = csi_data.numpy()
-            csi_data = add_awgn(csi_data, noise_lv)
+            csi_data = add_salt_and_pepper_noise(csi_data, noise_lv)
             # Convert to tensor if necessary
             csi_data = torch.tensor(csi_data).float()  # Ensure data type is float
             

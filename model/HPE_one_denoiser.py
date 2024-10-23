@@ -37,7 +37,11 @@ class OneStageAE(nn.Module):
         encoded = self.encoder(x)
         decoded = self.decoder(encoded)
         return decoded
-
+    
+    def getEncoder(self):
+        return nn.Sequential(
+                self.encoder
+            )
 
 class OneLayerDenoiserHPE(nn.Module):
     def __init__(self, encoder):

@@ -17,7 +17,7 @@ from constant import experiment_config, denoiser_config
 from dataset_lib import make_dataset, make_dataloader
 from model import OriginalHPE, OneLayerDenoiserHPE, TwoLayerDenoiserHPE, ThreeLayerDenoiserHPE, FourLayerDenoiserHPE, FiveLayerDenoiserHPE
 from utils import compute_pck_pckh, calulate_error, add_awgn
-from traditional_filter import mean_filter, apply_kalman_filter_4d
+from traditional_filter import mean_filter, gaussian_filter
 
 with open(experiment_config['mmfi_config'], 'r') as fd:  # change the .yaml file in your code.
     config = yaml.load(fd, Loader=yaml.FullLoader)
@@ -33,6 +33,9 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 torch.cuda.empty_cache()
 for noise_lv in tqdm(experiment_config["noise_level"]):
+    if noise_lv != 0.5:
+        continue
+    
     torch.cuda.empty_cache()
     if experiment_config['mode'] != 1:
         metafi = OriginalHPE().to(device)
@@ -71,7 +74,8 @@ for noise_lv in tqdm(experiment_config["noise_level"]):
                 csi_data = add_awgn(csi_data, noise_lv)
             elif experiment_config['mode'] == 2:
                 csi_data = csi_data.numpy()
-                csi_data = apply_kalman_filter_4d(csi_data)
+                csi_data = add_awgn(csi_data, noise_lv)
+                csi_data = mean_filter(csi_data)
                 
             csi_data = torch.tensor(csi_data)
             csi_data = csi_data.cuda()
@@ -133,7 +137,7 @@ for noise_lv in tqdm(experiment_config["noise_level"]):
                 elif experiment_config['mode'] == 2:
                     csi_data = csi_data.numpy()
                     csi_data = add_awgn(csi_data, noise_lv)
-                    csi_data = apply_kalman_filter_4d(csi_data)
+                    csi_data = mean_filter(csi_data)
                 
                 csi_data = torch.tensor(csi_data)
                 csi_data = csi_data.cuda()
@@ -241,7 +245,7 @@ for noise_lv in tqdm(experiment_config["noise_level"]):
             csi_data = csi_data.to('cpu').numpy()
             csi_data = add_awgn(csi_data, noise_level=noise_lv)
             if experiment_config['mode'] == 2:
-                csi_data = apply_kalman_filter_4d(csi_data)
+                csi_data = mean_filter(csi_data)
     
     
             #for i in range(csi_data.shape[0]):

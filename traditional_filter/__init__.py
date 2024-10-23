@@ -7,4 +7,4 @@ Created on Tue Oct 22 23:58:47 2024
 """
 
 from .mean_filter import mean_filter 
-from .kalman_filter import apply_kalman_filter_4d
+from .gaussian_filter import gaussian_filter

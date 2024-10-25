@@ -15,8 +15,8 @@ from tqdm import tqdm
 
 from constant import experiment_config, denoiser_config
 from dataset_lib import make_dataset, make_dataloader
-from model import OriginalHPE, OneLayerDenoiserHPE, TwoLayerDenoiserHPE, ThreeLayerDenoiserHPE, FourLayerDenoiserHPE, FiveLayerDenoiserHPE
-from utils import compute_pck_pckh, calulate_error, add_awgn
+from model import OriginalHPE, OneLayerDenoiserHPE, TwoLayerDenoiserHPE, ThreeLayerDenoiserHPE, FourLayerDenoiserHPE, FiveLayerDenoiserHPE, BasicCnnHPE
+from utils import compute_pck_pckh, calulate_error, add_awgn, add_salt_and_pepper_noise
 from traditional_filter import mean_filter, gaussian_filter
 
 with open(experiment_config['mmfi_config'], 'r') as fd:  # change the .yaml file in your code.
@@ -33,12 +33,9 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 torch.cuda.empty_cache()
 for noise_lv in tqdm(experiment_config["noise_level"]):
-    if noise_lv != 0.5:
-        continue
-    
     torch.cuda.empty_cache()
     if experiment_config['mode'] != 1:
-        metafi = OriginalHPE().to(device)
+        metafi = BasicCnnHPE().to(device)
     else:
         AEncoder = torch.load(os.path.join(denoiser_config['checkpoint'], str(noise_lv), "last.pt"))
         denoiser = AEncoder.getEncoder()
@@ -71,11 +68,11 @@ for noise_lv in tqdm(experiment_config["noise_level"]):
             
             if experiment_config['mode'] == 1:
                 csi_data = csi_data.numpy()
-                csi_data = add_awgn(csi_data, noise_lv)
+                csi_data = add_salt_and_pepper_noise(csi_data, noise_lv)
             elif experiment_config['mode'] == 2:
                 csi_data = csi_data.numpy()
-                csi_data = add_awgn(csi_data, noise_lv)
-                csi_data = mean_filter(csi_data)
+                csi_data = add_salt_and_pepper_noise(csi_data, noise_lv)
+                csi_data = gaussian_filter(csi_data)
                 
             csi_data = torch.tensor(csi_data)
             csi_data = csi_data.cuda()
@@ -133,11 +130,11 @@ for noise_lv in tqdm(experiment_config["noise_level"]):
                 csi_data = data['input_wifi-csi']
                 if experiment_config['mode'] == 1:
                     csi_data = csi_data.numpy()
-                    csi_data = add_awgn(csi_data, noise_lv)
+                    csi_data = add_salt_and_pepper_noise(csi_data, noise_lv)
                 elif experiment_config['mode'] == 2:
                     csi_data = csi_data.numpy()
-                    csi_data = add_awgn(csi_data, noise_lv)
-                    csi_data = mean_filter(csi_data)
+                    csi_data = add_salt_and_pepper_noise(csi_data, noise_lv)
+                    csi_data = gaussian_filter(csi_data)
                 
                 csi_data = torch.tensor(csi_data)
                 csi_data = csi_data.cuda()
@@ -243,9 +240,9 @@ for noise_lv in tqdm(experiment_config["noise_level"]):
             #add noise and denoise
             
             csi_data = csi_data.to('cpu').numpy()
-            csi_data = add_awgn(csi_data, noise_level=noise_lv)
+            csi_data = add_salt_and_pepper_noise(csi_data, noise_level=noise_lv)
             if experiment_config['mode'] == 2:
-                csi_data = mean_filter(csi_data)
+                csi_data = gaussian_filter(csi_data)
     
     
             #for i in range(csi_data.shape[0]):

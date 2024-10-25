@@ -87,7 +87,7 @@ for noise_lv in tqdm(experiment_config["noise_level"]):
         # Print the average loss for this epoch
         avg_loss = running_loss / len(train_loader)
         
-        print(f'Epoch [{epoch + 1}/{num_epochs}], Loss: {avg_loss:.4f}')
+        # print(f'Epoch [{epoch + 1}/{num_epochs}], Loss: {avg_loss:.4f}')
         torch.save(model, os.path.join(checkpoint_path, "last.pt"))
 
 print('Training complete.')

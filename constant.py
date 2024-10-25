@@ -12,7 +12,7 @@ experiment_config = {
     "noise_level": [0.01, 0.02, 0.05, 0.1, 0.5, 1],
     "mode": 0,  # Mode 0: no denoiser layer, Mode 1: have AE denoiser layers, Mode 2: use traditional filter to denoise
     "epoch": 20,
-    "checkpoint": "/home/jackson-devworks/Desktop/ECCV_2024/output/SPN/BasicCnnHPE",
+    "checkpoint": "/home/jackson-devworks/Desktop/ECCV_2024/output/AWGN/OneLayerDenosing",
 }
 
 denoiser_config = {

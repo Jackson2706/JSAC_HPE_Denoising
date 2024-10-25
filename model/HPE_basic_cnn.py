@@ -11,8 +11,11 @@ class BasicCnnHPE(nn.Module):
         hidden_reg = 32 #number hidden dim of Regression
 
         self.CNN1 = nn.Conv2d(in_channels=3, out_channels=num_lay, kernel_size=7, stride=1)
-        self.CNN2 = nn.Conv2d(in_channels=num_lay, out_channels=num_lay*2, kernel_size=3, stride=1)
-        self.regression = regression(input_dim =6784 ,output_dim = 34, hidden_dim= hidden_reg)
+        self.bn = nn.BatchNorm2d(num_lay)
+        self.relu = nn.ReLU(inplace=True)
+
+        #self.CNN2 = nn.Conv2d(in_channels=num_lay, out_channels=num_lay*2, kernel_size=3, stride=1)
+        self.regression = regression(input_dim = 1728,output_dim = 34, hidden_dim= hidden_reg)
 
     def forward(self,x): #16,2,3,114,32
         batch = x.shape[0]
@@ -29,11 +32,11 @@ class BasicCnnHPE(nn.Module):
         " Selective-Dynamic_convolution "
         m = torch.nn.AvgPool2d((2, 2))
         x = self.CNN1(x)
-        #x = m(x)#[32, 64, 57, 5]
+        x = m(x)#[32, 64, 57, 5]
         
-        out1 = self.CNN2(x)
-        #out1 = self.bn1(out1)
-        #out1 = self.relu(out1)
+        #out1 = self.CNN2(x)
+        out1 = self.bn(x)
+        out1 = self.relu(out1)
         
         " Max-Pooling"
         

@@ -88,7 +88,7 @@ for noise_lv in tqdm(experiment_config["noise_level"]):
             
             
            
-    
+            print(csi_data.size())
             pred_xy_keypoint, time = metafi(csi_data) #b,2,17,17
             pred_xy_keypoint = pred_xy_keypoint.squeeze()
             #pred_xy_keypoint = torch.transpose(pred_xy_keypoint, 1, 2)

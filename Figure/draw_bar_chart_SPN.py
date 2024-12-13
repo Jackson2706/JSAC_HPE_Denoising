@@ -1,4 +1,3 @@
-
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -8,15 +7,17 @@ x = np.arange(len(x_labels))  # Numerical positions for the bars
 
 # Y-values for the six different methods
 y_values = [
-    [86.89, 80.90, 69.85, 52.06],  # HPE + Stacked AE
-    [86.63, 80.39, 68.74, 50.08],  # HPE + Traditional AE
-    [85.66, 78.94, 66.67, 48.40],  # HPE + Mean Filter
-    [78.39, 65.70, 47.90, 27.82],  # HPE + Gaussian Filter
-    [71.66, 59.52, 43.69, 25.20],  # HPE
-    [66.66, 44.52, 37.69, 10.20],  # Basic CNN
+    [79.87, 71.08, 58.10, 39.28],  # Method 1
+    [77.948, 67.365, 54.914, 34.669],  # Method 2
+    [76.68, 66.96, 53.37, 33.65],  # Method 3
+    [71.94, 57.28, 38.35, 20.47],  # Method 4
+    [71.253, 59.604, 44.067, 25.181],  # Method 5
+    [68.51, 58.10, 44.25, 25.75],  # Method 6
 ]
 
 labels = ['HPE + Stacked AE', 'HPE + Traditional AE', 'HPE + Mean Filter', 'HPE + Gaussian Filter', 'HPE', 'Basic CNN']
+colors = ['#66c2a5', '#fc8d62', '#8da0cb', '#e78ac3', '#a6d854', '#ffd92f']  # Different colors for each method
+hatch_patterns = ['/', '\\', 'x', '+', 'o', '|']  # Changed '-' to '|' for vertical lines
 
 # Set up the plot
 plt.style.use('seaborn-whitegrid')  # White background with grid
@@ -35,9 +36,9 @@ plt.figure(figsize=(10, 7), dpi=150)
 
 bar_width = 0.15  # Width of bars
 
-# Plot the bars for each method
-for i, y in enumerate(y_values):
-    plt.bar(x + i * bar_width, y, width=bar_width, label=labels[i])
+# Plot the bars for each method with hatching patterns and custom colors
+for i, (y, pattern, color) in enumerate(zip(y_values, hatch_patterns, colors)):
+    plt.bar(x + i * bar_width, y, width=bar_width, label=labels[i], hatch=pattern, color=color, linewidth=2)
 
 # Configure the axes and labels
 plt.ylabel('Percentage (\%)', fontsize=14)
@@ -51,5 +52,5 @@ plt.legend(loc='upper right', fontsize=12, frameon=True, facecolor='white', edge
 plt.grid(visible=True, color='black', linestyle='--', alpha=0.7)  # Set grid lines to black
 
 # Save and show the plot
-plt.savefig('SPN_bar.png', format='png', bbox_inches='tight')
+plt.savefig('SPN_bar.pdf', format='pdf', bbox_inches='tight', dpi = 500)
 plt.show()

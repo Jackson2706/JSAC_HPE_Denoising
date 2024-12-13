@@ -35,7 +35,7 @@ torch.cuda.empty_cache()
 for noise_lv in tqdm(experiment_config["noise_level"]):
     torch.cuda.empty_cache()
     if experiment_config['mode'] != 1:
-        metafi = BasicCnnHPE().to(device)
+        metafi = OriginalHPE().to(device)
     else:
         AEncoder = torch.load(os.path.join(denoiser_config['checkpoint'], str(noise_lv), "last.pt"))
         denoiser = AEncoder.getEncoder()
@@ -68,13 +68,16 @@ for noise_lv in tqdm(experiment_config["noise_level"]):
             
             if experiment_config['mode'] == 1:
                 csi_data = csi_data.numpy()
-                csi_data = add_salt_and_pepper_noise(csi_data, noise_lv)
+                csi_data = add_awgn(csi_data, noise_lv)
+                csi_data = torch.tensor(csi_data)
             elif experiment_config['mode'] == 2:
                 csi_data = csi_data.numpy()
-                csi_data = add_salt_and_pepper_noise(csi_data, noise_lv)
+                csi_data = add_awgn(csi_data, noise_lv)
                 csi_data = gaussian_filter(csi_data)
-                
-            csi_data = torch.tensor(csi_data)
+                csi_data = torch.tensor(csi_data)
+
+            else:
+                csi_data = csi_data.clone().detach().requires_grad_(True)
             csi_data = csi_data.cuda()
             csi_data = csi_data.type(torch.cuda.FloatTensor)
             #csi_dafeaturesta = csi_data.view(16,2,3,114,10)
@@ -88,7 +91,7 @@ for noise_lv in tqdm(experiment_config["noise_level"]):
             
             
            
-            print(csi_data.size())
+            # print(csi_data.size())
             pred_xy_keypoint, time = metafi(csi_data) #b,2,17,17
             pred_xy_keypoint = pred_xy_keypoint.squeeze()
             #pred_xy_keypoint = torch.transpose(pred_xy_keypoint, 1, 2)
@@ -130,13 +133,15 @@ for noise_lv in tqdm(experiment_config["noise_level"]):
                 csi_data = data['input_wifi-csi']
                 if experiment_config['mode'] == 1:
                     csi_data = csi_data.numpy()
-                    csi_data = add_salt_and_pepper_noise(csi_data, noise_lv)
+                    csi_data = add_awgn(csi_data, noise_lv)
+                    csi_data = torch.tensor(csi_data)
                 elif experiment_config['mode'] == 2:
                     csi_data = csi_data.numpy()
-                    csi_data = add_salt_and_pepper_noise(csi_data, noise_lv)
+                    csi_data = add_awgn(csi_data, noise_lv)
                     csi_data = gaussian_filter(csi_data)
-                
-                csi_data = torch.tensor(csi_data)
+                    csi_data = torch.tensor(csi_data)
+                else:
+                    csi_data = csi_data.clone().detach().requires_grad_(True)
                 csi_data = csi_data.cuda()
                 csi_data = csi_data.type(torch.cuda.FloatTensor)
                 
@@ -226,7 +231,7 @@ for noise_lv in tqdm(experiment_config["noise_level"]):
             scale = 6
             length_test = 27
             
-            csi_data = torch.tensor(csi_data)
+            csi_data = csi_data.clone().detach().requires_grad_(True)
             csi_data = csi_data.cuda()
             csi_data = csi_data.type(torch.cuda.FloatTensor)
             #csi_dafeaturesta = csi_data.view(16,2,3,114,10)
@@ -240,9 +245,12 @@ for noise_lv in tqdm(experiment_config["noise_level"]):
             #add noise and denoise
             
             csi_data = csi_data.to('cpu').numpy()
-            csi_data = add_salt_and_pepper_noise(csi_data, noise_level=noise_lv)
+            csi_data = add_awgn(csi_data, noise_level=noise_lv)
             if experiment_config['mode'] == 2:
                 csi_data = gaussian_filter(csi_data)
+
+            csi_data = torch.tensor(csi_data)
+
     
     
             #for i in range(csi_data.shape[0]):

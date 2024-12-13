@@ -1,6 +1,6 @@
 modality: wifi-csi
 
-protocol: protocol1
+protocol: protocol3
 
 data_unit: frame
 

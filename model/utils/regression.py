@@ -8,11 +8,8 @@ Created on Mon Oct 21 09:56:09 2024
 
 import torch
 import torch.nn as nn
-from torchvision.transforms import Resize
 import torch.nn.functional as F
-
-
-
+from torchvision.transforms import Resize
 
 
 class regression(nn.Module):

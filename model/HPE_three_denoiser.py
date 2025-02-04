@@ -1,13 +1,12 @@
-from torch import nn
-import torch
 import time
-
-from .utils import SKUnit, regression
-
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch import nn
+
+from .utils import SKUnit, regression
+
 
 class ThreeStageAE(nn.Module):
     def __init__(self, pre_encoder):

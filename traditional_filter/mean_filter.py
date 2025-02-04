@@ -8,6 +8,7 @@ Created on Tue Oct 22 23:49:32 2024
 
 import numpy as np
 
+
 def mean_filter(data, kernel_size=3):
     """
     Apply a mean filter to 4D WiFi CSI data (batch_size, num_channels, num_subcarriers, num_timesteps).

@@ -9,10 +9,10 @@ Created on Mon Oct 21 09:16:35 2024
 experiment_config = {
     "mmfi_config": "/home/jackson-devworks/Desktop/ECCV_2024/dataset_lib/config.yaml",
     "dataset_root": "/home/jackson-devworks/Desktop/HPE/Dataset",
-    "noise_level": [0.01, 0.02, 0.05, 0.1, 0.5, 1],
-    "mode": 1,  # Mode 0: no denoiser layer, Mode 1: have AE denoiser layers, Mode 2: use traditional filter to denoise
-    "epoch": 20,
-    "checkpoint": "/home/jackson-devworks/Desktop/ECCV_2024/output/AWGN/FiveLayerDenosing",
+    "noise_level": [0.0],
+    "mode": 0,  # Mode 0: no denoiser layer, Mode 1: have AE denoiser layers, Mode 2: use traditional filter to denoise
+    "epoch": 50,
+    "checkpoint": "/home/jackson-devworks/Desktop/ECCV_2024/output",
 }
 
 denoiser_config = {

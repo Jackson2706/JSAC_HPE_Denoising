@@ -1,10 +1,11 @@
-import os
-import scipy.io as scio
 import glob
+import os
+
 import cv2
-import torch
 import numpy as np
-from torch.utils.data import Dataset, DataLoader
+import scipy.io as scio
+import torch
+from torch.utils.data import DataLoader, Dataset
 
 
 def decode_config(config):

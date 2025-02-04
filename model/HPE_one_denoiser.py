@@ -1,12 +1,11 @@
-from torch import nn
-import torch
 import time
-
-from .utils import SKUnit, regression
-
 
 import torch
 import torch.nn as nn
+from torch import nn
+
+from .utils import SKUnit, regression
+
 
 class OneStageAE(nn.Module):
     def __init__(self, pre_encoder=None):

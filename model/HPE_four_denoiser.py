@@ -1,10 +1,10 @@
-from torch import nn
-import torch
-import torch.nn.functional as F
 import time
 
-from .utils import SKUnit, regression
+import torch
+import torch.nn.functional as F
+from torch import nn
 
+from .utils import SKUnit, regression
 
 
 class FourStageAE(nn.Module):

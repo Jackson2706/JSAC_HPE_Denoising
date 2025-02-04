@@ -8,6 +8,7 @@ Created on Mon Oct 21 10:55:19 2024
 
 import numpy as np
 
+
 def add_awgn(signal, noise_level):
     """
     Add Additive White Gaussian Noise (AWGN) to a signal.

@@ -1,6 +1,6 @@
 modality: wifi-csi
 
-protocol: protocol3
+protocol: protocol1
 
 data_unit: frame
 
@@ -60,9 +60,9 @@ split_to_use: random_split
 
 init_rand_seed: 0
 train_loader:
-  batch_size: 64
+  batch_size: 128
 val_loader:
-  batch_size: 32
+  batch_size: 64
 test_loader:
   batch_size: 1
 output_folder: ./ckpt/

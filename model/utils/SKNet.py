@@ -3,6 +3,9 @@
 import torch
 from torch import nn
 
+from .utils import ScaledDotProductAttention
+
+
 class SKConv(nn.Module):
     def __init__(self, input_dim, output_dim, dim1, dim2, pool_dim,  M=4, G=1, r=4, stride=1 ,L=32):
         """ Constructor
@@ -65,7 +68,6 @@ class SKConv(nn.Module):
                self.fcs.append(
                  nn.Conv1d(in_channels= d, out_channels=output_dim, kernel_size=1, stride=1)
                  )
-
 
 
 
@@ -158,14 +160,15 @@ class SKUnit(nn.Module):
             )
         
         self.relu = nn.ReLU(inplace=True)
-    
+
     def forward(self, x):
         residual = x
         
         out = self.conv1(x)
         out = self.conv2_sk(out)
         #out = self.conv3(out)
-        
+        # print(f"Output shape: {out.size()}")
+        # out = self.attention(out)
         #return self.relu(out + self.shortcut(residual))
         #return self.relu(out)
         return out

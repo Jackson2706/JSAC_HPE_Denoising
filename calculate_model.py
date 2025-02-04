@@ -1,6 +1,5 @@
-from thop import profile
 import torch
-
+from thop import profile
 
 config ={
     "Original": "/home/jackson-devworks/Desktop/ECCV_2024/output/AWGN/Original/0.1/best.pt",

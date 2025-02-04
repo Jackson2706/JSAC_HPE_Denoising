@@ -1,8 +1,10 @@
-from torch import nn
-import torch
 import time
 
+import torch
+from torch import nn
+
 from .utils import SKUnit, regression
+
 
 class BasicCnnHPE(nn.Module):
     def __init__(self):

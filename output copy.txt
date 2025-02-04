@@ -1,0 +1,8 @@
+Ver 1:
+
+Reference: test result with loss: 0.200, pck_50: 85.323, pck_40: 80.387, pck_30: 72.672, pck_20: 59.416, pck_10: 31.349, pck_5: 10.815, mpjpe: 137.451, pa_mpjpe: 92.758
+
+test result with loss: 0.209, pck_50: 85.069, pck_40: 80.347, pck_30: 73.071, pck_20: 60.524, pck_10: 33.757, pck_5: 12.451, mpjpe: 137.117, pa_mpjpe: 95.118
+
+Setting 3
+test result with loss: 0.185, pck_50: 85.965, pck_40: 80.349, pck_30: 71.846, pck_20: 57.208, pck_10: 28.708, pck_5: 9.711, mpjpe: 138.401, pa_mpjpe: 92.823

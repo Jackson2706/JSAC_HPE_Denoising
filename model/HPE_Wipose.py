@@ -6,20 +6,20 @@ from torch import nn
 from .utils import SKUnit, regression
 
 
-class OriginalHPE(nn.Module):
+class HPEWiPoseModel(nn.Module):
     def __init__(self):
-        super(OriginalHPE, self).__init__()
+        super(HPEWiPoseModel, self).__init__()
         num_lay = 64  # numer hidden dim of DyConv1
         hidden_reg = 32  # number hidden dim of Regression
 
         self.skunit1 = SKUnit(
-            in_features=3,
+            in_features=9,
             mid_features=num_lay,
             out_features=num_lay,
-            dim1=114,
+            dim1=30,
             dim2=10,
             pool_dim="freq-chan",
-            M=2,
+            M=4,
             G=64,
             r=4,
             stride=1,
@@ -29,17 +29,45 @@ class OriginalHPE(nn.Module):
             in_features=num_lay,
             mid_features=num_lay * 2,
             out_features=num_lay * 2,
-            dim1=57,
+            dim1=15,
             dim2=8,
             pool_dim="freq-chan",
-            M=2,
+            M=4,
+            G=64,
+            r=4,
+            stride=1,
+            L=32,
+        )
+
+        self.skunit3 = SKUnit(
+            in_features=num_lay * 2,
+            mid_features=num_lay * 4,
+            out_features=num_lay * 4,
+            dim1=7,
+            dim2=8,
+            pool_dim="freq-chan",
+            M=4,
+            G=64,
+            r=4,
+            stride=1,
+            L=32,
+        )
+
+        self.skunit4 = SKUnit(
+            in_features=num_lay * 4,
+            mid_features=num_lay * 4,
+            out_features=num_lay * 4,
+            dim1=7,
+            dim2=8,
+            pool_dim="freq-chan",
+            M=4,
             G=64,
             r=4,
             stride=1,
             L=32,
         )
         self.regression = regression(
-            input_dim=7168, output_dim=34, hidden_dim=hidden_reg
+            input_dim=1792, output_dim=36, hidden_dim=hidden_reg
         )
 
     def forward(self, x):  # 16,2,3,114,32
@@ -55,15 +83,14 @@ class OriginalHPE(nn.Module):
         x = m(x)  # [32, 64, 57, 5]
 
         out1 = self.skunit2(x)
-        # out1 = self.bn1(out1)
-        # out1 = self.relu(out1)
-
-        " Max-Pooling"
-
+        
         out1 = m(out1)
 
+        out1 = self.skunit3(out1)
+        # out1 = m(out1)
+        # out1 = self.skunit4(out1)
         x = self.regression(out1)
-        x = x.reshape(batch, 17, 2)
+        x = x.reshape(batch, 18, 2)
 
         time_end = time.time()
         time_sum = time_end - time_start

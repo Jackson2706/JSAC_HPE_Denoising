@@ -11,7 +11,7 @@ experiment_config = {
     "dataset_root": "/home/jackson-devworks/Desktop/HPE/Dataset",
     "noise_level": [0.0],
     "mode": 0,  # Mode 0: no denoiser layer, Mode 1: have AE denoiser layers, Mode 2: use traditional filter to denoise
-    "epoch": 50,
+    "epoch": 60,
     "checkpoint": "/home/jackson-devworks/Desktop/ECCV_2024/output",
 }
 

@@ -156,15 +156,17 @@ class SKUnit(nn.Module):
 class DSKNetTransMMFI(nn.Module):
     def __init__(self):
         super(DSKNetTransMMFI, self).__init__()
-        num_lay = 64
+        num_lay = 128
         hidden_reg = 32
+        G = 32
+        D = 3
         self.skunit1 = SKUnit(
             in_features=3,
             mid_features=num_lay,
             out_features=num_lay,
             img_size=[57, 10],
-            M=2,
-            G=64,
+            M=D,
+            G=G,
             r=4,
             stride=1,
             L=32,
@@ -174,15 +176,15 @@ class DSKNetTransMMFI(nn.Module):
             mid_features=num_lay * 2,
             out_features=num_lay * 2,
             img_size=[28, 4],
-            M=2,
-            G=64,
+            M=D,
+            G=G,
             r=4,
             stride=1,
             L=32,
         )
 
         self.regression = regression(
-            input_dim=1792, output_dim=34, hidden_dim=hidden_reg
+            input_dim=3584, output_dim=34, hidden_dim=hidden_reg
         )
         self.norm = nn.BatchNorm2d(num_lay)
 

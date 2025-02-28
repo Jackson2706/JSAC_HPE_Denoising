@@ -11,16 +11,21 @@ import numpy as np
 import torch
 import yaml
 from sklearn.model_selection import train_test_split
+from tabulate import tabulate
 from torch import nn
-from tqdm import tqdm
 from torch.utils.data import DataLoader
+from tqdm import tqdm
+
 from constant import experiment_config
-from wipose import WiPoseDataset
 from model import *
 from utils import calulate_error, compute_pck_pckh_18
+from wipose import WiPoseDataset
 
-
-train_dataset, test_dataset = WiPoseDataset(root_dir="/home/jackson-devworks/Desktop/HPE/Wi-Pose"), WiPoseDataset(root_dir="/home/jackson-devworks/Desktop/HPE/Wi-Pose", split="Test")
+train_dataset, test_dataset = WiPoseDataset(
+    root_dir="/home/jackson-devworks/Desktop/HPE/Wi-Pose"
+), WiPoseDataset(
+    root_dir="/home/jackson-devworks/Desktop/HPE/Wi-Pose", split="Test"
+)
 val_data, test_data = train_test_split(
     test_dataset, test_size=0.5, random_state=41
 )
@@ -31,7 +36,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 torch.cuda.empty_cache()
 
-metafi = DSKNetTransWipose().to(device)
+metafi = HPEWiPoseModel().to(device)
 
 criterion_L2 = nn.MSELoss().cuda()
 optimizer = torch.optim.AdamW(metafi.parameters(), lr=0.001)
@@ -132,7 +137,9 @@ for epoch_index in tqdm(range(num_epochs)):
             xy_keypoint = xy_keypoint.cpu()
             pred_xy_keypoint_pck = torch.transpose(pred_xy_keypoint, 1, 2)
             xy_keypoint_pck = torch.transpose(xy_keypoint, 1, 2)
-            pck = compute_pck_pckh_18(pred_xy_keypoint_pck, xy_keypoint_pck, 0.5)
+            pck = compute_pck_pckh_18(
+                pred_xy_keypoint_pck, xy_keypoint_pck, 0.5
+            )
 
             metric.append(calulate_error(pred_xy_keypoint, xy_keypoint))
             pck_50_iter.append(
@@ -149,8 +156,8 @@ for epoch_index in tqdm(range(num_epochs)):
         pa_mpjpe_mean = mean[1]
         pck_50 = np.mean(pck_50_iter, 0)
         pck_20 = np.mean(pck_20_iter, 0)
-        pck_50_overall = pck_50[17]
-        pck_20_overall = pck_20[17]
+        pck_50_overall = pck_50[18]
+        pck_20_overall = pck_20[18]
         print(
             "\nvalidation result with loss: %.3f, pck_50: %.3f, pck_20: %.3f, mpjpe: %.3f, pa_mpjpe: %.3f"
             % (
@@ -268,12 +275,12 @@ with torch.no_grad():
     pck_20 = np.mean(pck_20_iter, 0)
     pck_10 = np.mean(pck_10_iter, 0)
     pck_5 = np.mean(pck_5_iter, 0)
-    pck_50_overall = pck_50[17]
-    pck_40_overall = pck_40[17]
-    pck_30_overall = pck_30[17]
-    pck_20_overall = pck_20[17]
-    pck_10_overall = pck_10[17]
-    pck_5_overall = pck_5[17]
+    pck_50_overall = pck_50[18]
+    pck_40_overall = pck_40[18]
+    pck_30_overall = pck_30[18]
+    pck_20_overall = pck_20[18]
+    pck_10_overall = pck_10[18]
+    pck_5_overall = pck_5[18]
     print(
         "test result with loss: %.3f, pck_50: %.3f, pck_40: %.3f, pck_30: %.3f, pck_20: %.3f, pck_10: %.3f, pck_5: %.3f, mpjpe: %.3f, pa_mpjpe: %.3f"
         % (
@@ -288,3 +295,46 @@ with torch.no_grad():
             pa_mpjpe_mean,
         )
     )
+
+    label = [
+        "Nose",
+        "Neck",
+        "R.Shoulder",
+        "R.Elbow",
+        "R.Wrist",
+        "L.Shoulder",
+        "L.Elbow",
+        "L.Wrist",
+        "R.Hip",
+        "R.Knee",
+        "R.Ankle",
+        "L.Hip",
+        "L.Knee",
+        "L.Ankle",
+        "R.Eye",
+        "L.Eye",
+        "R.Ear",
+        "L.Ear",
+    ]
+
+    # Tạo danh sách dữ liệu
+    data = []
+    for i in range(len(label)):
+        data.append([label[i], pck_5[i], pck_10[i], pck_20[i], pck_30[i], pck_40[i], pck_50[i]])
+
+    # Thêm hàng "Average"
+    data.append(
+        [
+            "Average",
+            np.mean(pck_5),
+            np.mean(pck_10),
+            np.mean(pck_20),
+            np.mean(pck_30),
+            np.mean(pck_40),
+            np.mean(pck_50),
+        ]
+    )
+
+    # In bảng dạng tabular
+    headers = ["Keypoint", "PCK@5", "PCK@10", "PCK@20", "PCK@30", "PCK@40", "PCK@50"]
+    print(tabulate(data, headers=headers, tablefmt="grid", floatfmt=".2f"))

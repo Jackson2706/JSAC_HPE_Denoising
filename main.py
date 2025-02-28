@@ -53,7 +53,7 @@ torch.cuda.empty_cache()
 for noise_lv in tqdm(experiment_config["noise_level"]):
     torch.cuda.empty_cache()
     if experiment_config["mode"] != 1:
-        metafi = DSKNetTransMMFI().to(device)
+        metafi = OriginalHPE().to(device)
     else:
         AEncoder = torch.load(
             os.path.join(
@@ -64,7 +64,7 @@ for noise_lv in tqdm(experiment_config["noise_level"]):
         metafi = FiveLayerDenoiserHPE(denoiser).to(device)
 
     criterion_L2 = nn.MSELoss().cuda()
-    optimizer = torch.optim.AdamW(metafi.parameters(), lr=0.001)
+    optimizer = torch.optim.SGD(metafi.parameters(), lr=0.001)
     n_epochs = 20
     n_epochs_decay = 30
     epoch_count = 1
@@ -255,7 +255,9 @@ for noise_lv in tqdm(experiment_config["noise_level"]):
                     % (epoch_index, pck_20_overall)
                 )
                 checkpoint_path = os.path.join(
-                    experiment_config["checkpoint"], str(noise_lv)
+                    experiment_config["checkpoint"],
+                    metafi._get_name(),
+                    str(noise_lv),
                 )
                 os.makedirs(checkpoint_path, exist_ok=True)
                 torch.save(metafi, os.path.join(checkpoint_path, "best.pt"))
@@ -280,7 +282,12 @@ for noise_lv in tqdm(experiment_config["noise_level"]):
     pck_10_iter = []
     pck_5_iter = []
     metafi = torch.load(
-        os.path.join(experiment_config["checkpoint"], str(noise_lv), "best.pt")
+        os.path.join(
+            experiment_config["checkpoint"],
+            metafi._get_name(),
+            str(noise_lv),
+            "best.pt",
+        )
     )
     with torch.no_grad():
         for i, data in enumerate(test_loader):

@@ -41,16 +41,15 @@ for i, (y, pattern, color) in enumerate(zip(y_values, hatch_patterns, colors)):
     plt.bar(x + i * bar_width, y, width=bar_width, label=labels[i], hatch=pattern, color=color, linewidth=2)
 
 # Configure the axes and labels
-plt.ylabel('Percentage (\%)', fontsize=14)
-plt.xticks(x + bar_width * 2.5, x_labels, fontsize=12)
-plt.yticks(fontsize=12)
+plt.ylabel('Percentage (\%)', fontsize=28)
+plt.xticks(x + bar_width * 2.5, x_labels, fontsize=24)
+plt.yticks(fontsize=24)
 
 # Add legend with box
-plt.legend(loc='upper right', fontsize=12, frameon=True, facecolor='white', edgecolor='black')  # Add box for legend
+plt.legend(loc='upper right', fontsize=15, frameon=True, facecolor='white', edgecolor='black')  # Add box for legend
 
 # Enable grid with black lines
 plt.grid(visible=True, color='black', linestyle='--', alpha=0.7)  # Set grid lines to black
 
-# Save and show the plot
 plt.savefig('SPN_bar.pdf', format='pdf', bbox_inches='tight', dpi = 500)
 plt.show()

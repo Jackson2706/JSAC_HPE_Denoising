@@ -11,6 +11,7 @@ import numpy as np
 import torch
 import yaml
 from sklearn.model_selection import train_test_split
+from tabulate import tabulate
 from torch import nn
 from tqdm import tqdm
 
@@ -52,7 +53,7 @@ torch.cuda.empty_cache()
 metafi = DSKNetTransMMFI().to(device)
 
 criterion_L2 = nn.MSELoss().cuda()
-optimizer = torch.optim.AdamW(metafi.parameters(), lr=0.001)
+optimizer = torch.optim.Adam(metafi.parameters(), lr=0.001)
 n_epochs = 20
 n_epochs_decay = 30
 epoch_count = 1
@@ -253,7 +254,6 @@ with torch.no_grad():
         xy_keypoint_pck = torch.transpose(xy_keypoint, 1, 2)
 
         pck = compute_pck_pckh(pred_xy_keypoint_pck, xy_keypoint_pck, 0.5)
-
         metric.append(calulate_error(pred_xy_keypoint, xy_keypoint))
 
         pck_50_iter.append(
@@ -306,3 +306,43 @@ with torch.no_grad():
             pa_mpjpe_mean,
         )
     )
+
+    label = [
+        "Bot Torso",
+        "L.Hip",
+        "L.Knee",
+        "L.Foot",
+        "R.Hip",
+        "R.Knee",
+        "R.Foot",
+        "Center Torso",
+        "Upper Torso",
+        "Neck Base",
+        "Center Head",
+        "R.Shoulder",
+        "R.Elbow",
+        "R.Hand",
+        "L.Shoulder",
+        "L.Elbow",
+        "L.Hand",
+    ]
+
+    # Tạo danh sách dữ liệu
+    data = []
+    for i in range(len(label)):
+        data.append([label[i], pck_20[i], pck_30[i], pck_40[i], pck_50[i]])
+
+    # Thêm hàng "Average"
+    data.append(
+        [
+            "Average",
+            np.mean(pck_20),
+            np.mean(pck_30),
+            np.mean(pck_40),
+            np.mean(pck_50),
+        ]
+    )
+
+    # In bảng dạng tabular
+    headers = ["Keypoint", "PCK@20", "PCK@30", "PCK@40", "PCK@50"]
+    print(tabulate(data, headers=headers, tablefmt="grid", floatfmt=".2f"))
